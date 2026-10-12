@@ -1,0 +1,334 @@
+{
+  "run_started": "2026-10-12T21:24:29.037642+09:00",
+  "config": {
+    "crs": "EPSG:6677",
+    "download_buffer_m": 2000,
+    "overpass_timeout_s": 120,
+    "walk_speed_kmh": 4.8,
+    "minutes": 10,
+    "circle_radius_m": 800,
+    "qneat3": {
+      "STRATEGY": 0,
+      "DEFAULT_DIRECTION": 2,
+      "TOLERANCE": 0,
+      "CELL_SIZE": 10,
+      "ENTRY_COST_CALCULATION_METHOD": 0
+    },
+    "buffer_segments": 32,
+    "densify_interval_m": 10
+  },
+  "walkable_expression": "\"highway\" IS NOT NULL AND \"highway\" NOT IN ('motorway','motorway_link','construction','proposed','raceway','bus_guideway','abandoned','razed','platform') AND coalesce(attribute(@feature,'foot'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'foot'),'') NOT IN ('no','private') AND NOT (coalesce(attribute(@feature,'access'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'access'),'') IN ('no','private') AND coalesce(attribute(@feature,'foot'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'foot'),'') NOT IN ('yes','designated','permissive'))",
+  "review_expression": "coalesce(attribute(@feature,'indoor'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'indoor'),'') <> '' OR coalesce(attribute(@feature,'level'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'level'),'') <> '' OR coalesce(attribute(@feature,'opening_hours'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'opening_hours'),'') <> '' OR coalesce(attribute(@feature,'bridge'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'bridge'),'') <> '' OR coalesce(attribute(@feature,'tunnel'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'tunnel'),'') <> '' OR coalesce(attribute(@feature,'layer'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'layer'),'') <> '' OR coalesce(attribute(@feature,'covered'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'covered'),'') <> '' OR \"highway\" IN ('steps','corridor','elevator') OR coalesce(attribute(@feature,'railway'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'railway'),'') <> '' OR coalesce(attribute(@feature,'public_transport'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'public_transport'),'') <> ''",
+  "versions": {
+    "qgis_process_version": [
+      "QGIS 3.40.5-Bratislava 'Bratislava' (8d6d1b54486)",
+      "QGIS code revision 8d6d1b54486"
+    ],
+    "QNEAT3": "1.0.8",
+    "QuickOSM": "2.5.4"
+  },
+  "steps": [
+    {
+      "algorithm": "native:reprojectlayer",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/data/origin.gpkg",
+        "TARGET_CRS": "EPSG:6677",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/_tmp/t1.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/_tmp/t1.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:fieldcalculator",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/_tmp/t1.gpkg",
+        "FIELD_NAME": "oid",
+        "FIELD_TYPE": 1,
+        "FORMULA": "@row_number",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_6677.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_6677.gpkg"
+      }
+    },
+    {
+      "algorithm": "qgis:exportaddgeometrycolumns",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_6677.gpkg",
+        "CALC_METHOD": 0,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_xy.csv"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_xy.csv"
+      }
+    },
+    {
+      "algorithm": "native:reprojectlayer",
+      "inputs": {
+        "INPUT": "./data/osm_highway_20261012_2117.gpkg|layername=osm_highway_20261012_211_lines",
+        "TARGET_CRS": "EPSG:6677",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/osm_highway_raw_6677.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/osm_highway_raw_6677.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:extractbyexpression",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/osm_highway_raw_6677.gpkg",
+        "EXPRESSION": "\"highway\" IS NOT NULL AND \"highway\" NOT IN ('motorway','motorway_link','construction','proposed','raceway','bus_guideway','abandoned','razed','platform') AND coalesce(attribute(@feature,'foot'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'foot'),'') NOT IN ('no','private') AND NOT (coalesce(attribute(@feature,'access'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'access'),'') IN ('no','private') AND coalesce(attribute(@feature,'foot'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'foot'),'') NOT IN ('yes','designated','permissive'))",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/walk_network.gpkg",
+        "FAIL_OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/excluded_ways.gpkg"
+      },
+      "results": {
+        "FAIL_OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/excluded_ways.gpkg",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/walk_network.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:densifygeometriesgivenaninterval",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/walk_network.gpkg",
+        "INTERVAL": 10,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/walk_network_densified.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/walk_network_densified.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:extractbyexpression",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/walk_network_densified.gpkg",
+        "EXPRESSION": "coalesce(attribute(@feature,'indoor'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'indoor'),'') <> '' OR coalesce(attribute(@feature,'level'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'level'),'') <> '' OR coalesce(attribute(@feature,'opening_hours'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'opening_hours'),'') <> '' OR coalesce(attribute(@feature,'bridge'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'bridge'),'') <> '' OR coalesce(attribute(@feature,'tunnel'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'tunnel'),'') <> '' OR coalesce(attribute(@feature,'layer'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'layer'),'') <> '' OR coalesce(attribute(@feature,'covered'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'covered'),'') <> '' OR \"highway\" IN ('steps','corridor','elevator') OR coalesce(attribute(@feature,'railway'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'railway'),'') <> '' OR coalesce(attribute(@feature,'public_transport'),map_get(hstore_to_map(coalesce(attribute(@feature,'other_tags'),'')),'public_transport'),'') <> ''",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/review_candidates.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/review_candidates.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:shortestline",
+      "inputs": {
+        "SOURCE": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_6677.gpkg",
+        "DESTINATION": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/walk_network_densified.gpkg",
+        "METHOD": 0,
+        "NEIGHBORS": 1,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_to_network.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_to_network.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:fieldcalculator",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_to_network.gpkg",
+        "FIELD_NAME": "snap_m",
+        "FIELD_TYPE": 0,
+        "FIELD_PRECISION": 3,
+        "FORMULA": "length($geometry)",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_to_network_len.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_to_network_len.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:savefeatures",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_to_network_len.gpkg",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_to_network.csv"
+      },
+      "results": {
+        "FILE_PATH": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_to_network.csv",
+        "LAYER_NAME": null,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_to_network.csv"
+      }
+    },
+    {
+      "algorithm": "qneat3:isoareaaspointcloudfromlayer",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/walk_network_densified.gpkg",
+        "START_POINTS": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_6677.gpkg",
+        "ID_FIELD": "oid",
+        "MAX_DIST": 800.0,
+        "DEFAULT_SPEED": 4.8,
+        "STRATEGY": 0,
+        "DEFAULT_DIRECTION": 2,
+        "TOLERANCE": 0,
+        "ENTRY_COST_CALCULATION_METHOD": 0,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min_pointcloud.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min_pointcloud.gpkg"
+      }
+    },
+    {
+      "algorithm": "qneat3:isoareaasinterpolationfromlayer",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/walk_network_densified.gpkg",
+        "START_POINTS": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_6677.gpkg",
+        "ID_FIELD": "oid",
+        "MAX_DIST": 880.0000000000001,
+        "DEFAULT_SPEED": 4.8,
+        "STRATEGY": 0,
+        "DEFAULT_DIRECTION": 2,
+        "TOLERANCE": 0,
+        "ENTRY_COST_CALCULATION_METHOD": 0,
+        "CELL_SIZE": 10,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min_cost.tif"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min_cost.tif"
+      }
+    },
+    {
+      "algorithm": "gdal:contour_polygon",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min_cost.tif",
+        "BAND": 1,
+        "INTERVAL": 800.0,
+        "FIELD_NAME_MIN": "cost_min",
+        "FIELD_NAME_MAX": "cost_max",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min_bands.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min_bands.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:extractbyexpression",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min_bands.gpkg",
+        "EXPRESSION": "\"cost_max\" <= 800.0",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/_tmp/t3.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/_tmp/t3.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:dissolve",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/_tmp/t3.gpkg",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:buffer",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/origin_6677.gpkg",
+        "DISTANCE": 800,
+        "SEGMENTS": 32,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/circle_800.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/circle_800.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:difference",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/circle_800.gpkg",
+        "OVERLAY": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min.gpkg",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/circle_minus_iso.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/circle_minus_iso.gpkg"
+      }
+    },
+    {
+      "algorithm": "native:difference",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min.gpkg",
+        "OVERLAY": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/circle_800.gpkg",
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_minus_circle.gpkg"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_minus_circle.gpkg"
+      }
+    },
+    {
+      "algorithm": "qgis:exportaddgeometrycolumns",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/circle_800.gpkg",
+        "CALC_METHOD": 0,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/area_circle.csv"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/area_circle.csv"
+      }
+    },
+    {
+      "algorithm": "qgis:exportaddgeometrycolumns",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_10min.gpkg",
+        "CALC_METHOD": 0,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/area_iso.csv"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/area_iso.csv"
+      }
+    },
+    {
+      "algorithm": "qgis:exportaddgeometrycolumns",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/circle_minus_iso.gpkg",
+        "CALC_METHOD": 0,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/area_circle_minus_iso.csv"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/area_circle_minus_iso.csv"
+      }
+    },
+    {
+      "algorithm": "qgis:exportaddgeometrycolumns",
+      "inputs": {
+        "INPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/iso_minus_circle.gpkg",
+        "CALC_METHOD": 0,
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/area_iso_minus_circle.csv"
+      },
+      "results": {
+        "OUTPUT": "~/ゼミ_10月ハッカソン/machida-walk/output/run_20261012_2124/area_iso_minus_circle.csv"
+      }
+    }
+  ],
+  "origin": {
+    "fid": "2",
+    "name": "北口",
+    "exit_type": "通路",
+    "note": "北口改札から最初の地上の道",
+    "checked_on": "2026/10/12",
+    "source": "JR東日本 町田駅構内図",
+    "oid": "0",
+    "xcoord": "-35163.6846608853",
+    "ycoord": "-50725.4422695398"
+  },
+  "osm_source": {
+    "file": "./data/osm_highway_20261012_2117.gpkg",
+    "note": "既存ファイルを使用（再取得なし）"
+  },
+  "origin_to_network_m": 0.032,
+  "origin_snap_way": {
+    "osm_id": "1085045748",
+    "full_id": "w1085045748",
+    "highway": "footway",
+    "bridge": "yes",
+    "layer": "1",
+    "opening_hours": "24/7"
+  },
+  "iso_method": "QNEAT3 Iso-Area as Interpolation (from Layer, MAX_DIST 880 m = 1.1倍) → GDAL contour_polygon (interval 800 m) → cost_max <= 800 を抽出・融合",
+  "areas_m2": {
+    "円 半径800m": 2009811.94045103,
+    "徒歩10分圏（QNEAT3）": 1261891.38583535,
+    "円に入るが到達圏外": 747920.554615686,
+    "到達圏だが円の外": 0
+  },
+  "run_finished": "2026-10-12T21:25:48.454503+09:00"
+}

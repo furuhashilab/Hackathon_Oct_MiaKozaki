@@ -1,0 +1,6 @@
+.DS_Store
+__pycache__/
+*-shm
+*-wal
+output/*/_tmp/
+output/*/gaps/_tmp/

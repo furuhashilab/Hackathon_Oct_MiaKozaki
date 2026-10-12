@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>町田駅 徒歩10分圏と半径800m</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root { --iso: #eb781e; --circle: #1e46b4; --gap: #285ac8; --ink: #1d1d1f; --muted: #5f6368; --panel: #ffffffee; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif; color: var(--ink); background: #f4f4f2; }
+    #map { position: absolute; inset: 0; }
+    #panel { position: absolute; z-index: 1000; top: 12px; left: 12px; width: 360px; max-height: calc(100% - 24px); overflow: auto;
+             background: var(--panel); border-radius: 12px; padding: 16px 18px; box-shadow: 0 2px 12px #0002; font-size: 13px; line-height: 1.6; }
+    h1 { font-size: 17px; margin: 0 0 4px; }
+    .sub { color: var(--muted); margin: 0 0 12px; }
+    table { border-collapse: collapse; width: 100%; margin: 8px 0 12px; font-variant-numeric: tabular-nums; }
+    th, td { padding: 3px 6px; border-bottom: 1px solid #e3e3e3; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    .lg { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+    .sw { width: 22px; height: 14px; border-radius: 3px; flex: none; }
+    .note { color: var(--muted); font-size: 12px; }
+    details { margin-top: 10px; }
+    summary { cursor: pointer; font-weight: 600; }
+    .sector-label { background: #fffffff0; border: none; border-radius: 6px; box-shadow: 0 1px 4px #0003; font-size: 12px; font-weight: 600; padding: 2px 6px; text-align: center; line-height: 1.35; white-space: nowrap; }
+    .sector-label::before { display: none; }
+    @media (max-width: 640px) {
+      #panel { top: auto; bottom: 0; left: 0; width: 100%; max-height: 45%; border-radius: 12px 12px 0 0; padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <aside id="panel">
+    <h1>町田駅から徒歩10分で行ける範囲は、半径800mの円とどれくらい違うのか？</h1>
+    <p class="sub">QNEAT3 による道路ネットワークの到達圏（OSM）と、円形バッファの比較</p>
+
+    <div class="lg"><span class="sw" style="background:#eb781e80;border:2px solid #c85a0a"></span>徒歩10分圏（道路距離 800 m）</div>
+    <div class="lg"><span class="sw" style="border:2px dashed var(--circle)"></span>半径800mの円</div>
+    <div class="lg"><span class="sw" style="background:#285ac855"></span>円の中で10分では届かない範囲</div>
+    <div class="lg"><span class="sw" style="background:#000;width:10px;height:10px;border-radius:50%;margin:0 6px"></span>踏切・線路の横断（OSM）</div>
+    <div class="lg"><span style="color:#dc143c;font-size:18px;width:22px;text-align:center">★</span>起点：JR町田駅 北口（デッキ・2階）</div>
+
+    <table>
+      <tr><th>範囲</th><th>面積</th><th>円に対して</th></tr>
+      <tr><td>半径800mの円</td><td>2.010 km²</td><td>100%</td></tr>
+      <tr><td>徒歩10分圏</td><td>1.262 km²</td><td>62.8%</td></tr>
+      <tr><td>円の中で届かない範囲</td><td>0.748 km²</td><td>37.2%</td></tr>
+    </table>
+    <p class="note">扇形のラベル：方位ごとの到達率／届かない部分の迂回率（道路距離÷直線距離の中央値）。扇形をクリックすると詳細が出ます。</p>
+
+    <details>
+      <summary>条件</summary>
+      <p class="note">
+        起点：北緯35.542158° 東経139.445526°（2026-10-12 確認、JR東日本 町田駅構内図）<br>
+        歩行速度：時速4.8 km（毎分80 m）一定。10分＝道路距離800 mとして Shortest（距離）で計算<br>
+        方向：両方向（車の一方通行は歩行者に適用しない）／トポロジー許容値 0<br>
+        信号待ち・坂・階段・混雑は含まない<br>
+        道路：OSM highway（2026-10-12 21:17 取得、Overpass API / QuickOSM 2.5.4）<br>
+        解析：QGIS 3.40.5、QNEAT3 1.0.8（Pointcloud・Interpolation）→ GDAL 等高線ポリゴン
+      </p>
+    </details>
+    <details>
+      <summary>出典</summary>
+      <p class="note">
+        背景地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル（淡色地図）</a><br>
+        道路・踏切データ：© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>（ODbL）<br>
+        参考発表：Maisarah「GIS-Based Walking Map Isochrones in Measuring Transit Catchment」FOSS4G 2026
+      </p>
+    </details>
+  </aside>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map', { zoomControl: false }).setView([35.5422, 139.4455], 15);
+    L.control.zoom({ position: 'topright' }).addTo(map);
+    L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
+
+    const gsi = L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+      maxZoom: 18, attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
+    }).addTo(map);
+    const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a>'
+    });
+
+    const load = (name) => fetch(`geojson/${name}.geojson`).then((r) => r.json());
+    const fmt = (n) => Math.round(n).toLocaleString('ja-JP');
+
+    Promise.all(['sectors', 'circle_minus_iso', 'iso_10min', 'circle_800', 'rail_crossings', 'excluded_ways', 'origin'].map(load))
+      .then(([sectors, gap, iso, circle, xing, excluded, origin]) => {
+        const gapL = L.geoJSON(gap, { style: { stroke: false, fillColor: '#285ac8', fillOpacity: 0.3 } }).addTo(map);
+        const isoL = L.geoJSON(iso, { style: { color: '#c85a0a', weight: 2, fillColor: '#eb781e', fillOpacity: 0.35 } }).addTo(map);
+        const circleL = L.geoJSON(circle, { style: { color: '#1e46b4', weight: 2, dashArray: '6 6', fill: false } }).addTo(map);
+
+        const labels = L.layerGroup();
+        const sectorL = L.geoJSON(sectors, {
+          style: { color: '#555', weight: 1, dashArray: '2 4', fillOpacity: 0 },
+          onEachFeature: (f, layer) => {
+            const p = f.properties;
+            layer.bindPopup(`<b>${p.direction}</b><br>到達率 ${p.reached_pct}%<br>届かない面積 ${fmt(p.gap_m2)} m²<br>`
+              + `迂回率（中央値） ${p.median_detour_ratio}<br>道路 ${p.median_network_m} m ／ 直線 ${p.median_straight_m} m`);
+            const a = (p.sector_id - 1) * 45 * Math.PI / 180;
+            const o = origin.features[0].geometry.coordinates;
+            const dLat = 880 * Math.cos(a) / 110574, dLng = 880 * Math.sin(a) / (111320 * Math.cos(o[1] * Math.PI / 180));
+            L.tooltip({ permanent: true, direction: 'center', className: 'sector-label' })
+              .setLatLng([o[1] + dLat, o[0] + dLng])
+              .setContent(`${p.direction} ${Math.round(p.reached_pct)}%<br>迂回率 ${p.median_detour_ratio}`)
+              .addTo(labels);
+          }
+        }).addTo(map);
+        labels.addTo(map);
+
+        const xingL = L.geoJSON(xing, {
+          pointToLayer: (f, ll) => L.circleMarker(ll, { radius: 5, color: '#fff', weight: 1.5, fillColor: '#000', fillOpacity: 1 }),
+          onEachFeature: (f, layer) => layer.bindPopup(`${f.properties.railway === 'level_crossing' ? '踏切' : '線路の横断'}`
+            + `<br>${f.properties.name ?? ''}<br>${f.properties.full_id}`)
+        }).addTo(map);
+        const exL = L.geoJSON(excluded, {
+          style: { color: '#dc1e1e', weight: 3, dashArray: '4 4' },
+          onEachFeature: (f, layer) => layer.bindPopup(Object.entries(f.properties).map(([k, v]) => `${k}=${v}`).join('<br>'))
+        });
+        const originL = L.geoJSON(origin, {
+          pointToLayer: (f, ll) => L.marker(ll, { icon: L.divIcon({ html: '<span style="color:#dc143c;font-size:26px;text-shadow:0 0 3px #fff">★</span>', className: '', iconSize: [26, 26], iconAnchor: [13, 15] }) }),
+          onEachFeature: (f, layer) => layer.bindPopup(`<b>起点</b><br>${f.properties.name}（${f.properties.exit_type}）<br>${f.properties.source}`)
+        }).addTo(map);
+
+        L.control.layers({ '地理院 淡色地図': gsi, 'OpenStreetMap': osm }, {
+          '徒歩10分圏': isoL, '半径800mの円': circleL, '円の中で届かない範囲': gapL,
+          '方位の扇形（到達率）': sectorL, '扇形のラベル': labels, '踏切・線路の横断': xingL,
+          '除外した道（歩行不可など）': exL, '起点': originL
+        }, { position: 'topright', collapsed: true }).addTo(map);
+
+        // パネルに隠れない位置に円が収まるようにする（PC は左、スマホは下にパネル）
+        const panel = document.getElementById('panel');
+        const mobile = window.innerWidth <= 640;
+        map.fitBounds(circleL.getBounds(), mobile
+          ? { paddingTopLeft: [10, 10], paddingBottomRight: [10, panel.offsetHeight + 10] }
+          : { paddingTopLeft: [panel.offsetWidth + 24, 20], paddingBottomRight: [20, 20] });
+      });
+  </script>
+</body>
+</html>

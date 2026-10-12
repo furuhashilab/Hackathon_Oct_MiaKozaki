@@ -1,0 +1,17 @@
+到達コスト: 10分 × 4.8 km/h = 800 m（距離で計算）
+1. 起点を投影座標系へ
+  ✓ native:reprojectlayer
+  ✓ native:fieldcalculator
+  ✓ qgis:exportaddgeometrycolumns
+   起点 (EPSG:6677): x=-35163.68, y=-50725.44
+2. OSM 道路データ（QuickOSM）
+  ✓ native:buffer
+  ✓ native:reprojectlayer
+  ✓ quickosm:buildqueryextent
+  ✓ quickosm:downloadosmdataextentquery
+3. 投影座標系へ変換・歩行可能な道の抽出
+[失敗] native:reprojectlayer
+
+ERROR:	An error was encountered while checking parameter values
+	Could not load source layer for INPUT: ~/ゼミ_10月ハッカソン/machida-walk/data/osm_highway_20261012_2117.osm|layername=lines not found
+

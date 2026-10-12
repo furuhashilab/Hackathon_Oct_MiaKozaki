@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "origin",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "fid": 2, "name": "北口", "exit_type": "デッキ（2階）", "note": "北口改札から最初の地上の道", "checked_on": "2026/10/12", "source": "JR東日本 町田駅構内図" }, "geometry": { "type": "Point", "coordinates": [ 139.445526170538102, 35.542158467655668 ] } }
+]
+}
